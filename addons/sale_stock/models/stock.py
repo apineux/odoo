@@ -119,7 +119,8 @@ class ProductionLot(models.Model):
         for lot in self:
             stock_moves = self.env['stock.move.line'].search([
                 ('lot_id', '=', lot.id),
-                ('state', '=', 'done')
+                ('state', '=', 'done'),
+                ('move_id.company_id', 'child_of', self.env.user.company_id.id)
             ]).mapped('move_id').filtered(
                 lambda move: move.picking_id.location_dest_id.usage == 'customer' and move.state == 'done')
             lot.sale_order_ids = stock_moves.mapped('sale_line_id.order_id')

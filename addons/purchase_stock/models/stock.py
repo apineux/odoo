@@ -207,9 +207,10 @@ class ProductionLot(models.Model):
     @api.depends('name')
     def _compute_purchase_order_ids(self):
         for lot in self:
-            stock_moves = self.env['stock.move.line'].search([
+            stock_moves = self.env['stock.move.line'].sudo().search([
                 ('lot_id', '=', lot.id),
-                ('state', '=', 'done')
+                ('state', '=', 'done'),
+                ('move_id.company_id', 'child_of', self.env.user.company_id.id)
             ]).mapped('move_id').filtered(
                 lambda move: move.picking_id.location_id.usage == 'supplier' and move.state == 'done')
             lot.purchase_order_ids = stock_moves.mapped('purchase_line_id.order_id')
